@@ -1,9 +1,9 @@
 const { expect } = require('chai');
 const knex = require('knex');
 const app = require('../src/app');
-const { makeFoldersArray, makeNotesArray} = require('./noteful.fixtures');
+const { makeFoldersArray } = require('./noteful.fixtures');
 
-describe.only('Noteful Endpoints', () => {
+describe('Noteful Folder Endpoints', () => {
     let db;
 
     before('make knex instance', () => {
@@ -68,7 +68,7 @@ describe.only('Noteful Endpoints', () => {
         it(`responds with 400 error when name of folder is missing`, () => {
             return supertest(app)
                     .post(`/api/folders`)
-                    .send({ someRadomField: 'Hey hey folder'})
+                    .send({ someRandomField: 'Hey hey folder'})
                     .expect(400, {
                         error: { message: `Folder name is missing`}
                     })
@@ -101,4 +101,51 @@ describe.only('Noteful Endpoints', () => {
             })
         })
     });
+    describe(`PATCH /api/fodlers/:folderId`, () => {
+        const testFolders = makeFoldersArray()
+        beforeEach('insert folders', () => {
+            return db
+                    .into('folders')
+                    .insert(testFolders)
+        })
+        it('returns a 400 when folder name is missing', () => {
+            const folderId = 2
+            const fakeNameTest = {
+                foo: 'New Name'
+            }
+            return supertest(app)
+                    .patch(`/api/folders/${folderId}`)
+                    .send(fakeNameTest)
+                    .expect(400, {error: {message: 'Request body must contain name'}})
+        })
+        it('PATCH /api/folders/:folderId returns a 204 when successful', () => {
+            const folderId = 2
+            const newNameTest = {
+                name: 'New Name'
+            }
+            return supertest(app)
+                    .patch(`/api/folders/${folderId}`)
+                    .send(newNameTest)
+                    .expect(204)
+        })
+    })
+    describe.only(`DELETE /api/folders/:folderId`, () => {
+        const testFolders = makeFoldersArray()
+        beforeEach('insert folders', () => {
+            return db
+                    .into('folders')
+                    .insert(testFolders)
+        })
+        it('returns a 204 when successfully deleted', () => {
+            const folderId = 1
+            const expectedFolders = testFolders.filter(folder => folder.id !== folderId)
+            return supertest(app)
+                        .delete(`/api/folders/${folderId}`)
+                        .expect(204)
+                        .then(res => 
+                            supertest(app)
+                            .get(`/api/folders`)
+                            .expect(expectedFolders))
+        })
+    })
 })
