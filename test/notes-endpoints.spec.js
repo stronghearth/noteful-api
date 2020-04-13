@@ -20,7 +20,7 @@ describe('Noteful Note Endpoints', () => {
 
     afterEach('cleanup', () => db.raw('TRUNCATE folders, notes RESTART IDENTITY CASCADE'));
 
-    describe.only('GET /api/notes', () => {
+    describe('GET /api/notes', () => {
         context('given there are no notes', () => {
             it('responds with a 200 with an empty list of notes', () => {
                 return supertest(app)
@@ -48,6 +48,73 @@ describe('Noteful Note Endpoints', () => {
                 return supertest(app)
                         .get('/api/notes')
                         .expect(200, testNotes)
+            })
+        })
+    })
+
+    describe('POST /api/notes', () => {
+        this.retries
+
+        const testFolders = makeFoldersArray()
+
+        beforeEach('insert folders', () => {
+            return db
+                    .into('folders')
+                    .insert(testFolders)
+        })
+
+
+        it(`creates a note, responding with 201 and new note`, () => {
+            const newNote = {
+                name: 'Test New Note',
+                content: 'I am a new note!',
+                folderid: testFolders[0].id
+            }
+            return supertest(app)
+                    .post(`/api/notes`)
+                    .send(newNote)
+                    .expect(201)
+                    .expect(res => {
+                        expect(res.body.name).to.eql(newNote.name)
+                        expect(res.body).to.have.property('id')
+                        expect(res.body).to.have.property('modified')
+                        expect(res.headers.location).to.eql(`/api/notes/${res.body.id}`)
+                    })
+                    .then(postRes => {
+                        supertest(app)
+                            .get(`/api/notes/${postRes.body.id}`)
+                            .expect(postRes.body)
+                    })
+        })
+
+        const requiredFields = ['name', 'content', 'folderid']
+
+        requiredFields.forEach(field => {
+            const newNote = {
+                name: 'Note Name',
+                content: 'I am a note',
+                folderid: testFolders[0].id
+            }
+        
+
+        it(`responds with 400 error when ${field} is missing`, () => {
+            delete newNote[field]
+            return supertest(app)
+                    .post(`/api/notes`)
+                    .send(newNote)
+                    .expect(400, {error: {message: `Missing '${field}' in request body`}})
+        })
+
+        })
+    })
+
+    describe.only(`GET /api/notes/:noteId`, () => {
+        context('given there are no notes', () => {
+            it('responds with 404', () => {
+                const noteId = 123456;
+                return supertest(app)
+                        .get(`/api/notes/${noteId}`)
+                        .expect(404, {error: {message: `Note doesn't exist`}})
             })
         })
     })
