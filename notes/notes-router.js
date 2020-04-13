@@ -68,4 +68,26 @@ notesRouter
     .get((req, res, next) => {
         res.json(serializeNote(res.note))
     }) 
+    .patch(jsonParser, (req, res, next) => {
+        const knexInstance = req.app.get('db')
+
+        const { name, content } = req.body
+        const noteToUpdate = { name, content }
+        const noteId = res.note.id
+
+        const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length
+            if(numberOfValues === 0) {
+                return res.status(400).json({
+                    error: {
+                        message: `Request body must include either name or content.`
+                    }
+                })
+            }
+
+        NotesService.updateNote(knexInstance, noteId, noteToUpdate)
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
 module.exports = notesRouter;

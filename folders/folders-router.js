@@ -69,7 +69,6 @@ foldersRouter
         const { name } = req.body
         const folderToUpdate = { name }
         const folderId = res.folder.id
-        console.log(folderId)
 
         if(!name) {
             return res.status(400).json({

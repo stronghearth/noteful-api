@@ -142,4 +142,49 @@ describe('Noteful Note Endpoints', () => {
             })
         })
     })
+    describe.only(`PATCH /api/notes/:noteId`, () => {
+        const testFolders = makeFoldersArray()
+        const testNotes = makeNotesArray()
+
+        beforeEach('insert folders', () => {
+            return db
+                    .into('folders')
+                    .insert(testFolders)
+        })
+
+        beforeEach('insert notes', () => {
+            return db
+                    .into('notes')
+                    .insert(testNotes)
+        })
+
+        it('responds with 204 and updates note', () => {
+            const noteId = 2
+            const updatedNote = {
+                name: 'I am anew',
+                content: 'My content has been remodeled',
+            }
+            const expectedNote = {
+                ...testNotes[noteId - 1],
+                ...updatedNote
+            }
+            return supertest(app)
+                    .patch(`/api/notes/${noteId}`)
+                    .send(updatedNote)
+                    .expect(204)
+                    .then(res => {
+                        supertest(app)
+                            .get(`/api/notes/${noteId}`)
+                            .expect(expectedNote)
+            })
+        })
+
+        it('responds with 400 when no request body is empty', () => {
+            const noteId = 2
+            return supertest(app)
+                    .patch(`/api/notes/${noteId}`)
+                    .send({notARealField : 'hello'})
+                    .expect(400, {error: {message: `Request body must include either name or content.`}})
+        })
+    })
 })

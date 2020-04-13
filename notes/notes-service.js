@@ -29,10 +29,10 @@ const NotesService = {
                 });
     },
 
-    updateNote(knex, noteId, noteToUpdate){
+    updateNote(knex, id, noteToUpdate){
         return knex 
                 .from('notes')
-                .where({ noteId })
+                .where({ id })
                 .update(noteToUpdate)
     },
 
