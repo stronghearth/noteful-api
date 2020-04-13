@@ -101,7 +101,7 @@ describe('Noteful Folder Endpoints', () => {
             })
         })
     });
-    describe(`PATCH /api/fodlers/:folderId`, () => {
+    describe(`PATCH /api/folders/:folderId`, () => {
         const testFolders = makeFoldersArray()
         beforeEach('insert folders', () => {
             return db

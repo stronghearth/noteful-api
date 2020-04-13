@@ -108,13 +108,37 @@ describe('Noteful Note Endpoints', () => {
         })
     })
 
-    describe.only(`GET /api/notes/:noteId`, () => {
+    describe(`GET /api/notes/:noteId`, () => {
         context('given there are no notes', () => {
             it('responds with 404', () => {
                 const noteId = 123456;
                 return supertest(app)
                         .get(`/api/notes/${noteId}`)
                         .expect(404, {error: {message: `Note doesn't exist`}})
+            })
+        })
+        context('given there are notes', () => {
+            const testFolders = makeFoldersArray();
+            const testNotes = makeNotesArray();
+
+            beforeEach('insert folders', () => {
+                return db
+                        .into('folders')
+                        .insert(testFolders)
+            })
+
+            beforeEach('insert notes', () => {
+                return db   
+                        .into('notes')
+                        .insert(testNotes)
+            })
+
+            it(`GET /api/notes/:noteId returns 200 response with expected note`, () => {
+                const noteId = 2;
+                expectedNote = testNotes[noteId - 1];
+                return supertest(app)
+                        .get(`/api/notes/${noteId}`)
+                        .expect(200, expectedNote)
             })
         })
     })

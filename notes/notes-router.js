@@ -50,7 +50,7 @@ notesRouter
 
 notesRouter
     .route('/:noteId')
-    .get((req, res, next) => {
+    .all((req, res, next) => {
         const knexInstance = req.app.get('db')
 
         NotesService.getById(knexInstance, req.params.noteId)
@@ -65,4 +65,7 @@ notesRouter
             })
             .catch(next)
     })
+    .get((req, res, next) => {
+        res.json(serializeNote(res.note))
+    }) 
 module.exports = notesRouter;
