@@ -129,7 +129,7 @@ describe('Noteful Folder Endpoints', () => {
                     .expect(204)
         })
     })
-    describe.only(`DELETE /api/folders/:folderId`, () => {
+    describe(`DELETE /api/folders/:folderId`, () => {
         const testFolders = makeFoldersArray()
         beforeEach('insert folders', () => {
             return db
