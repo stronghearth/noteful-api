@@ -142,7 +142,7 @@ describe('Noteful Note Endpoints', () => {
             })
         })
     })
-    describe.only(`PATCH /api/notes/:noteId`, () => {
+    describe(`PATCH /api/notes/:noteId`, () => {
         const testFolders = makeFoldersArray()
         const testNotes = makeNotesArray()
 
@@ -185,6 +185,35 @@ describe('Noteful Note Endpoints', () => {
                     .patch(`/api/notes/${noteId}`)
                     .send({notARealField : 'hello'})
                     .expect(400, {error: {message: `Request body must include either name or content.`}})
+        })
+    })
+    describe('DELETE /api/notes/:noteId', () => {
+        const testFolders = makeFoldersArray()
+        const testNotes = makeNotesArray()
+
+        beforeEach('insert folders', () => {
+            return db
+                    .into('folders')
+                    .insert(testFolders)
+        })
+
+        beforeEach('insert notes', () => {
+            return db
+                    .into('notes')
+                    .insert(testNotes)
+        })
+
+        it('returns a 204 when successfully deleted', () => {
+            const noteId = 2
+            const expectedNotes = testNotes.filter(note => note.id !== noteId)
+
+            return supertest(app)
+                    .delete(`/api/notes/${noteId}`)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get('/api/notes')
+                            .expect(expectedNotes))
         })
     })
 })

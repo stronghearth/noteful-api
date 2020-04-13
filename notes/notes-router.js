@@ -90,4 +90,15 @@ notesRouter
             })
             .catch(next)
     })
+    .delete((req, res, next) => {
+        const knexInstance = req.app.get('db')
+
+        const noteId = res.note.id
+
+        NotesService.deleteNote(knexInstance, noteId)
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
 module.exports = notesRouter;
