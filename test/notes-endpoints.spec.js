@@ -9,7 +9,7 @@ describe('Noteful Note Endpoints', () => {
     before('make knex instance', () => {
         db = knex({
             client: 'pg',
-            connection: process.env.TEST_DB_URL
+            connection: process.env.TEST_DATABASE_URL
         })
         app.set('db', db);
     });
@@ -68,7 +68,7 @@ describe('Noteful Note Endpoints', () => {
             const newNote = {
                 name: 'Test New Note',
                 content: 'I am a new note!',
-                folderid: testFolders[0].id
+                folder_id: testFolders[0].id
             }
             return supertest(app)
                     .post(`/api/notes`)
@@ -87,13 +87,13 @@ describe('Noteful Note Endpoints', () => {
                     })
         })
 
-        const requiredFields = ['name', 'content', 'folderid']
+        const requiredFields = ['name', 'content', 'folder_id']
 
         requiredFields.forEach(field => {
             const newNote = {
                 name: 'Note Name',
                 content: 'I am a note',
-                folderid: testFolders[0].id
+                folder_id: testFolders[0].id
             }
         
 
